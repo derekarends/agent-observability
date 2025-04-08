@@ -9,10 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Observability.Console.Multi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{F95FA5B3-5A38-46B7-A051-DF231A041DFA}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		DockerCompose.Arize.yaml = DockerCompose.Arize.yaml
 		DockerCompose.Langfuse.yaml = DockerCompose.Langfuse.yaml
-		DockerCompose.Langfuse2.yaml = DockerCompose.Langfuse2.yaml
-		langfuse.env = langfuse.env
 	EndProjectSection
 EndProject
 Global

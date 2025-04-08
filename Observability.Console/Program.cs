@@ -13,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("env.local.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("env.local.json", optional: false, reloadOnChange: true)
     .Build();
 
 var model = configuration["model"];
