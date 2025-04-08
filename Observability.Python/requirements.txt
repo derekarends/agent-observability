@@ -1,0 +1,11 @@
+langfuse
+langchain
+langgraph
+langchain_openai
+langchain_community
+langchain_experimental 
+pandas 
+wikipedia
+python-dotenv
+arize-phoenix-otel
+openinference-instrumentation-langchain
