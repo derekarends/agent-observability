@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <None Remove="env.local.json" />
-    <EmbeddedResource Include="sampe.env.json">
+    <EmbeddedResource Include="sample.env.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="env.local.json">
