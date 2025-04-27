@@ -58,27 +58,27 @@ public static class ServiceExtensions
             {
                 options.SetResourceBuilder(resourceBuilder);
                 options.AddOtlpExporter(options => options.Endpoint = new Uri(aspireEndpoint));
-                
+
                 options.IncludeFormattedMessage = true;
                 options.IncludeScopes = true;
                 options.ParseStateValues = true;
             });
             builder.SetMinimumLevel(LogLevel.Trace);
         });
-        
+
         services.AddSingleton(loggerFactory);
         return services;
     }
-    
+
     public static IServiceCollection AddLangfuseLogging(this IServiceCollection services, IConfiguration configuration)
     {
         var langFuse = $"{configuration["langfuseEndpoint"]}/api/public/otel";
-        // var langFuse = configuration["langfuseEndpoint"];
-        var publicKey = configuration["langFusePublicKey"];
-        var privateKey = configuration["langFusePrivateKey"];
+        var publicKey = configuration["langfusePublicKey"];
+        var secretKey = configuration["langfuseSecretKey"];
 
-        var credentials = $"{publicKey}:{privateKey}";
-        var langfuseAuth = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
+        var langfuseAuth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{publicKey}:{secretKey}"));
+        var authHeader = $"Authorization=Basic {langfuseAuth}";
+        var endpoint = new Uri(langFuse);
 
         var resourceBuilder = ResourceBuilder
             .CreateDefault()
@@ -88,19 +88,25 @@ public static class ServiceExtensions
 
         var tracerProvider = Sdk.CreateTracerProviderBuilder()
             .SetResourceBuilder(resourceBuilder)
-            .AddOtlpExporter(options =>
+            .AddSource("Microsoft.SemanticKernel*")
+            .AddOtlpExporter(o =>
             {
-                options.Headers = $"Authorization=Basic {langfuseAuth}";
-                options.Endpoint = new Uri(langFuse);
+                o.Headers = authHeader;
+                o.Endpoint = endpoint;
+                o.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+                o.ExportProcessorType = ExportProcessorType.Simple;
             })
             .Build();
 
         var meterProvider = Sdk.CreateMeterProviderBuilder()
             .SetResourceBuilder(resourceBuilder)
-            .AddOtlpExporter(options =>
+            .AddMeter("Microsoft.SemanticKernel*")
+            .AddOtlpExporter(o =>
             {
-                options.Headers = $"Authorization=Basic {langfuseAuth}";
-                options.Endpoint = new Uri(langFuse);
+                o.Headers = authHeader;
+                o.Endpoint = endpoint;
+                o.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+                o.ExportProcessorType = ExportProcessorType.Simple;
             })
             .Build();
 
@@ -111,17 +117,19 @@ public static class ServiceExtensions
                 options.SetResourceBuilder(resourceBuilder);
                 options.AddOtlpExporter(o =>
                 {
-                    o.Headers = $"Authorization=Basic {langfuseAuth}";
-                    o.Endpoint = new Uri(langFuse);
+                    o.Headers = authHeader;
+                    o.Endpoint = endpoint;
+                    o.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf;
+                    o.ExportProcessorType = ExportProcessorType.Simple;
                 });
-        
+
                 options.IncludeFormattedMessage = true;
                 options.IncludeScopes = true;
                 options.ParseStateValues = true;
             });
-            builder.SetMinimumLevel(LogLevel.Information);
+            builder.SetMinimumLevel(LogLevel.Trace);
         });
-        
+
         services.AddSingleton(loggerFactory);
         return services;
     }

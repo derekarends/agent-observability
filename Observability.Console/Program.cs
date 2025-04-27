@@ -15,7 +15,7 @@ var apiKey = configuration["apiKey"];
 
 var builder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(model, azureEndpoint, apiKey);
 builder.Services.AddLangfuseLogging(configuration);
-builder.Services.AddAspireLogging(configuration);
+//builder.Services.AddAspireLogging(configuration);
 
 
 Kernel kernel = builder.Build();
