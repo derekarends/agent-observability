@@ -56,3 +56,5 @@ nunit-*.xml
 env.*.json
 
 .vs
+.idea
+*.sln.DotSettings.*

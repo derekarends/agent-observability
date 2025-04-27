@@ -1,14 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel;
+﻿using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Observability.Console.SingleAgent;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Resources;
-using OpenTelemetry;
-using OpenTelemetry.Trace;
-using OpenTelemetry.Metrics;
 using Microsoft.Extensions.Configuration;
 
 var configuration = new ConfigurationBuilder()
@@ -19,56 +12,11 @@ var configuration = new ConfigurationBuilder()
 var model = configuration["model"];
 var azureEndpoint = configuration["azureEndpoint"];
 var apiKey = configuration["apiKey"];
-var aspireEndpoint = configuration["aspireEndpoint"];
-
-
-AppContext.SetSwitch("Microsoft.SemanticKernel.Experimental.GenAI.EnableOTelDiagnosticsSensitive", true);
-
-var resourceBuilder = ResourceBuilder
-    .CreateDefault()
-    .AddService("Aspire");
-
-using var traceProvider = Sdk.CreateTracerProviderBuilder()
-    .SetResourceBuilder(resourceBuilder)
-    .AddSource("Microsoft.SemanticKernel*")
-    .AddOtlpExporter(options => options.Endpoint = new Uri(aspireEndpoint))
-    .Build();
-
-using var meterProvider = Sdk.CreateMeterProviderBuilder()
-    .SetResourceBuilder(resourceBuilder)
-    .AddMeter("Microsoft.SemanticKernel*")
-    .AddOtlpExporter(options => options.Endpoint = new Uri(aspireEndpoint))
-    .Build();
-
-using var loggerFactory = LoggerFactory.Create(builder =>
-{
-    // Add OpenTelemetry as a logging provider
-    builder.AddOpenTelemetry(options =>
-    {
-        options.SetResourceBuilder(resourceBuilder);
-        options.AddOtlpExporter(options => options.Endpoint = new Uri(aspireEndpoint));
-        // Format log messages. This is default to false.
-        options.IncludeFormattedMessage = true;
-        options.IncludeScopes = true;
-    });
-    builder.SetMinimumLevel(LogLevel.Information);
-});
 
 var builder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(model, azureEndpoint, apiKey);
-builder.Services.AddSingleton(loggerFactory);
+builder.Services.AddLangfuseLogging(configuration);
+builder.Services.AddAspireLogging(configuration);
 
-//var builder = Kernel.CreateBuilder().AddAzureOpenAIChatCompletion(model, azureEndpoint, apiKey);
-//builder.Services.AddLogging(loggingBuilder =>
-//{
-//    loggingBuilder.AddConsole();
-//    loggingBuilder.SetMinimumLevel(LogLevel.Information);
-//});
-
-//builder.Services.AddSingleton<IFunctionInvocationFilter, LoggingFilter>(sp =>
-//{
-//    var logger = sp.GetRequiredService<ILogger<LoggingFilter>>();
-//    return new LoggingFilter(logger);
-//});
 
 Kernel kernel = builder.Build();
 var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();

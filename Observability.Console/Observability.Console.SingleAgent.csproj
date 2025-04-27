@@ -18,12 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="sample.env.json">
+    <None Remove="env.local.json" />
+    <EmbeddedResource Include="env.local.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="env.local.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </EmbeddedResource>
   </ItemGroup>
-
 </Project>
